@@ -11,7 +11,7 @@ function zklua_my_watcher(zh, type, state, path, watcherctx)
     end
 end
 
---date why to be the path 
+--data why to be the path 
 function zklua_create_completion(rc, data)
     if rc == zklua.ZOK then
         print(data .. " create successfully\n")
@@ -19,6 +19,22 @@ function zklua_create_completion(rc, data)
         print("node exists\n")
     else
         print("create " .. data .. "failed\n")
+    end
+end
+
+function zklua_get_children_watcher(zh, type, state, path, watcherctx)
+    print("zklua_my_local_watcher(".."type: "..type..", state: "..state..", path: "..path..")")
+    print("zklua_my_local_watcher(".."watcherctx: "..watcherctx..")")
+end
+
+function void_completion(rc, value, data)
+    if rc == zklua.ZOK then
+        print(data)
+        if type(value) == "table" then
+            for _, v in pairs(value) do
+                print(v)
+            end
+        end
     end
 end
 
@@ -35,7 +51,8 @@ end
 local init_acl = {{perms = 31, scheme = "world", id = "anyone"},}
 
 local ipaddr = "127.0.0.1"
-local ret = zklua.acreate(zh, "/cdn/kuzan/server", ipaddr, init_acl, bit.bor(zklua.ZOO_SEQUENCE, zklua.ZOO_EPHEMERAL), zklua_create_completion, "/cdn/kuzan/server create")
+local ret = zklua.aget_children(zh, "/cdn/kuzan", 0, void_completion, "get /cdn/kuzan children")
+
 
 if ret ~= zklua.ZOK then
     print("/cdn/kuzan/server call acreate fail, ret: " .. ret)
